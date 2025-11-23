@@ -156,11 +156,13 @@ enum Role {
 }
 
 enum DevDomain {
-  ANDROID
+  ANDROID_FLUTTER
+  ANDROID_KOTLIN
   ARVR
   ML
   WEBDEV
   UIUX
+  GENAI
 }
 
 enum Subject {

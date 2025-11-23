@@ -13,7 +13,7 @@ async function main() {
       library_id: "LIB100001",
       email: "user1@example.com",
       role: "USER",
-      domain_dev: "ANDROID",
+      domain_dev: "ANDROID_FLUTTER",
       domain_dsa: "CPP",
       year: 1,
     },
@@ -53,6 +53,15 @@ async function main() {
       domain_dsa: "CPP",
       year: 4,
     },
+    {
+      name: "User Six",
+      library_id: "LIB100020",
+      email: "user6@example.com", 
+      role: "USER",
+      domain_dev: "ANDROID_KOTLIN",
+      domain_dsa: "CPP",
+      year: 4,
+    },
 
     // COORDINATORS
     {
@@ -60,7 +69,7 @@ async function main() {
       library_id: "LIB100006",
       email: "coord1@example.com",
       role: "COORDINATOR",
-      domain_dev: "ANDROID",
+      domain_dev: "ANDROID_FLUTTER",
       domain_dsa: "JAVA",
       year: 3,
     },
@@ -101,13 +110,23 @@ async function main() {
       year: 3,
     },
 
+    {
+      name: "Coord Six",
+      library_id: "LIB100030",
+      email: "coord6@example.com",
+      role: "COORDINATOR",
+      domain_dev: "ANDROID_KOTLIN",
+      domain_dsa: "JAVA",
+      year: 3,
+    },
+
     // LEADS
     {
       name: "Lead One",
       library_id: "LIB100011",
       email: "lead1@example.com",
       role: "LEAD",
-      domain_dev: "ANDROID",
+      domain_dev: "ANDROID_FLUTTER",
       domain_dsa: "CPP",
       year: 2,
     },
@@ -147,6 +166,15 @@ async function main() {
       domain_dsa: "CPP",
       year: 1,
     },
+    {
+      name: "Lead Six",
+      library_id: "LIB100031",
+      email: "lead6@example.com",
+      role: "LEAD",
+      domain_dev: "ANDROID_KOTLIN",
+      domain_dsa: "CPP",
+      year: 2,
+    },
   ];
 
   for (const user of users) {
@@ -156,6 +184,7 @@ async function main() {
         password: hashedPassword,
       },
     });
+    
     const tracker = await prisma.trackerDashboard.create({
       data: {
         userId: createdUser.id,
@@ -189,7 +218,7 @@ async function main() {
     });
   }
 
-  console.log("✅ Seeded 15 users successfully.");
+  console.log(`✅ Seeded ${users.length} users successfully.`);
 }
 
 main()

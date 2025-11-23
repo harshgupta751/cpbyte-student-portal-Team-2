@@ -4,6 +4,28 @@ import ResponseError from "../types/ResponseError.js";
 import axios from "axios";
 import cloudinary from "../config/cloudinary.js";
 
+async function ensureTracker(userId) {
+  if (!userId) throw new Error("userId required for ensureTracker");
+  let tracker = await prisma.trackerDashboard.findUnique({
+    where: { userId },
+    include: { leetcode: true, github: true, projects: true },
+  });
+
+  if (!tracker) {
+    tracker = await prisma.trackerDashboard.create({
+      data: {
+        userId,
+        past5: [],
+        skills: [],
+        rank: 0,
+      },
+      include: { leetcode: true, github: true, projects: true },
+    });
+  }
+
+  return tracker;
+}
+
 export const getTrackerDashboard = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
@@ -128,58 +150,51 @@ export const addLeetCode = asyncHandler(async (req, res) => {
     throw new ResponseError("Leetcode username is required", 400);
   }
 
-  const leetcode = await axios.get(
+  // fetch from LeetCode
+  const leetcodeResp = await axios.get(
     `https://leetcode.com/graphql?query=query%20{%20matchedUser(username:%22${leetcodeUsername}%22)%20{%20submissionCalendar%20submitStats%20{%20acSubmissionNum%20{%20count%20}%20}%20}%20}`
   );
 
-  const matchedUser = leetcode.data.data.matchedUser;
-
+  const matchedUser = leetcodeResp?.data?.data?.matchedUser;
   if (!matchedUser) {
     throw new ResponseError("Leetcode user not found", 404);
   }
 
-  const tracker = await prisma.trackerDashboard.findUnique({
-    where: {
-      userId: req.userId,
-    },
-    include: {
-      leetcode: true,
-    },
-  });
+  // Ensure tracker exists
+  const tracker = await ensureTracker(req.userId);
 
-  await prisma.leetcode.update({
-    where: {
-      id: tracker.leetcode.id,
-    },
-    data: {
+  // Upsert Leetcode record by trackerId (tracker.id is guaranteed)
+  const leetcodeEntry = await prisma.leetcode.upsert({
+    where: { trackerId: tracker.id },
+    update: {
       username: leetcodeUsername,
       url: `https://leetcode.com/${leetcodeUsername}/`,
-      solvedProblems: matchedUser.submitStats.acSubmissionNum[0].count,
-      easy: matchedUser.submitStats.acSubmissionNum[1].count,
-      medium: matchedUser.submitStats.acSubmissionNum[2].count,
-      hard: matchedUser.submitStats.acSubmissionNum[3].count,
-      calendar: matchedUser.submissionCalendar,
-      tracker: {
-        connect: {
-          id: tracker.id,
-        },
-      },
+      solvedProblems: Number(matchedUser.submitStats.acSubmissionNum[0].count || 0),
+      easy: Number(matchedUser.submitStats.acSubmissionNum[1].count || 0),
+      medium: Number(matchedUser.submitStats.acSubmissionNum[2].count || 0),
+      hard: Number(matchedUser.submitStats.acSubmissionNum[3].count || 0),
+      calendar: matchedUser.submissionCalendar || "",
+    },
+    create: {
+      trackerId: tracker.id,
+      username: leetcodeUsername,
+      url: `https://leetcode.com/${leetcodeUsername}/`,
+      solvedProblems: Number(matchedUser.submitStats.acSubmissionNum[0].count || 0),
+      easy: Number(matchedUser.submitStats.acSubmissionNum[1].count || 0),
+      medium: Number(matchedUser.submitStats.acSubmissionNum[2].count || 0),
+      hard: Number(matchedUser.submitStats.acSubmissionNum[3].count || 0),
+      calendar: matchedUser.submissionCalendar || "",
     },
   });
 
+  // compute past5 and update tracker.past5
   const past5Days = getPastFiveDays();
   const record = await check(past5Days, matchedUser.submissionCalendar);
 
   const updatedTracker = await prisma.trackerDashboard.update({
-    where: {
-      id: tracker.id,
-    },
-    data: {
-      past5: record,
-    },
-    include: {
-      leetcode: true,
-    },
+    where: { id: tracker.id },
+    data: { past5: record },
+    include: { leetcode: true },
   });
 
   return res.status(200).json(updatedTracker);
@@ -191,9 +206,7 @@ export const addProject = asyncHandler(async (req, res) => {
   if (!project) {
     throw new ResponseError("Project data is required", 400);
   }
-  const tracker = await prisma.trackerDashboard.findUnique({
-    where: { userId: req.userId },
-  });
+  const tracker = await ensureTracker(req.userId);
 
   if (!tracker) {
     throw new ResponseError("Tracker not found for this user", 404);
@@ -257,19 +270,10 @@ export const addGitHub = asyncHandler(async (req, res) => {
     throw new ResponseError("GitHub data is required", 400);
   }
 
-  const tracker = await prisma.trackerDashboard.findUnique({
-    where: {
-      userId: req.userId,
-    },
-    include: {
-      github: true,
-    },
-  });
+  // ensure tracker exists
+  const tracker = await ensureTracker(req.userId);
 
-  if (!tracker) {
-    throw new ResponseError("User Tracker Dashboard not found", 404);
-  }
-
+  // call GitHub GraphQL API
   const response = await axios.post(
     "https://api.github.com/graphql",
     {
@@ -282,21 +286,27 @@ export const addGitHub = asyncHandler(async (req, res) => {
     }
   );
 
-  if (response.status !== 200) {
+  if (response.status !== 200 || !response.data?.data?.user) {
     throw new ResponseError("GitHub user not found", 404);
   }
 
-  const totalContributions =
-    response.data.data.user.contributionsCollection.contributionCalendar
-      .totalContributions;
-  const totalPullRequests = response.data.data.user.pullRequests.totalCount;
-  const totalRepositories = response.data.data.user.repositories.totalCount;
+  const data = response.data.data.user;
+  const totalContributions = data.contributionsCollection.contributionCalendar.totalContributions || 0;
+  const totalPullRequests = data.pullRequests.totalCount || 0;
+  const totalRepositories = data.repositories.totalCount || 0;
 
-  const updatedGithub = await prisma.gitHub.update({
-    where: {
-      id: tracker.github.id,
+  // upsert github entry by trackerId
+  const githubEntry = await prisma.gitHub.upsert({
+    where: { trackerId: tracker.id },
+    update: {
+      url: `https://github.com/${githubUsername}`,
+      contributions: totalContributions,
+      prs: totalPullRequests,
+      repos: totalRepositories,
+      username: githubUsername,
     },
-    data: {
+    create: {
+      trackerId: tracker.id,
       url: `https://github.com/${githubUsername}`,
       contributions: totalContributions,
       prs: totalPullRequests,
@@ -305,7 +315,7 @@ export const addGitHub = asyncHandler(async (req, res) => {
     },
   });
 
-  return res.status(200).json(updatedGithub);
+  return res.status(200).json(githubEntry);
 });
 
 export const refreshAll = asyncHandler(async (req, res) => {
