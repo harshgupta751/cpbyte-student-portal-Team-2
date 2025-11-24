@@ -90,8 +90,8 @@ export const markAttendance = asyncHandler(async (req, res) => {
       status === "PRESENT"
         ? "PRESENT"
         : status === "ABSENT WITH REASON"
-        ? "ABSENT_WITH_REASON"
-        : "ABSENT_WITHOUT_REASON";
+          ? "ABSENT_WITH_REASON"
+          : "ABSENT_WITHOUT_REASON";
 
     ops.push(
       prisma.attendance.upsert({
@@ -139,11 +139,14 @@ export const memberOfDomain = asyncHandler(async (req, res) => {
   }
 
   const validDevDomains = {
-    ANDROID: "ANDROID",
+    ANDROID: "ANDROID_FLUTTER",
+    ANDROID_FLUTTER: "ANDROID_FLUTTER",
+    ANDROID_KOTLIN: "ANDROID_KOTLIN",
     ARVR: "ARVR",
     ML: "ML",
     WEBDEV: "WEBDEV",
     UIUX: "UIUX",
+    GENAI: "GENAI",
   };
 
   const validDsaDomains = {

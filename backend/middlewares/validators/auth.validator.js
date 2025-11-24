@@ -64,7 +64,7 @@ export const validateRegisterRequest = asyncHandler(async (req, res, next) => {
     role: {
       optional: true,
       isIn: {
-        options: [["ADMIN", "USER", "COORDINATOR" , "LEAD"]],
+        options: [["ADMIN", "USER", "COORDINATOR", "LEAD"]],
         errorMessage:
           "Role must be either 'ADMIN' or 'USER' or a 'COORDINATOR'",
       },
@@ -82,7 +82,7 @@ export const validateRegisterRequest = asyncHandler(async (req, res, next) => {
         errorMessage: "Domain Dev must be a string",
       },
       isIn: {
-        options: [["ANDROID", "ARVR", "ML", "WEBDEV", "UIUX"]],
+        options: [["ANDROID_FLUTTER", "ANDROID_KOTLIN", "ARVR", "ML", "WEBDEV", "UIUX", "GENAI"]],
         errorMessage: "Invalid Dev Domain",
       },
     },
