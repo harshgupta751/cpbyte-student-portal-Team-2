@@ -99,6 +99,8 @@ model Attendance {
   subject   Subject
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
+
+  @@unique([userId, date, subject])
 }
 
 model Schedule {
@@ -154,11 +156,13 @@ enum Role {
 }
 
 enum DevDomain {
-  ANDROID
+  ANDROID_FLUTTER
+  ANDROID_KOTLIN
   ARVR
   ML
   WEBDEV
   UIUX
+  GENAI
 }
 
 enum Subject {

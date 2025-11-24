@@ -27,7 +27,17 @@ function TrackerDashboard() {
 
   useEffect(() => {
     const date = new Date();
-    setDate(date.toUTCString());
+    const indiaTime = date.toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true
+    });
+    setDate(indiaTime);
   }, []);
 
   useEffect(() => {
@@ -138,9 +148,8 @@ function TrackerDashboard() {
               {data?.past5.map((day, index) => (
                 <div
                   key={index}
-                  className={`${
-                    day == 0 ? "bg-red-500" : "bg-green-500"
-                  } w-4 h-4 md:w-5 md:h-5 rounded-md`}
+                  className={`${day == 0 ? "bg-red-500" : "bg-green-500"
+                    } w-4 h-4 md:w-5 md:h-5 rounded-md`}
                 ></div>
               ))}
             </span>
@@ -171,105 +180,105 @@ function TrackerDashboard() {
               </div>
 
               <div className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto">
-  <div className="aspect-square w-full">
-    <ResponsiveContainer width="100%" height="100%">
-      <PieChart>
-        {(() => {
-          const pieData = [
-            {
-              name: "Easy",
-              value: data?.leetcode.easy || 0,
-              fill: "#00e676",
-            },
-            {
-              name: "Medium",
-              value: data?.leetcode.medium || 0,
-              fill: "#ff9100",
-            },
-            {
-              name: "Hard",
-              value: data?.leetcode.hard || 0,
-              fill: "#f44336",
-            },
-          ].filter((item) => item.value > 0);
+                <div className="aspect-square w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      {(() => {
+                        const pieData = [
+                          {
+                            name: "Easy",
+                            value: data?.leetcode.easy || 0,
+                            fill: "#00e676",
+                          },
+                          {
+                            name: "Medium",
+                            value: data?.leetcode.medium || 0,
+                            fill: "#ff9100",
+                          },
+                          {
+                            name: "Hard",
+                            value: data?.leetcode.hard || 0,
+                            fill: "#f44336",
+                          },
+                        ].filter((item) => item.value > 0);
 
-          const getResponsiveSizes = () => {
-            return {
-              innerRadius: "35%", 
-              outerRadius: "65%", 
-              labelOffset: 25,
-              fontSize: 12,
-            };
-          };
+                        const getResponsiveSizes = () => {
+                          return {
+                            innerRadius: "35%",
+                            outerRadius: "65%",
+                            labelOffset: 25,
+                            fontSize: 12,
+                          };
+                        };
 
-          const { innerRadius, outerRadius, labelOffset, fontSize } = getResponsiveSizes();
+                        const { innerRadius, outerRadius, labelOffset, fontSize } = getResponsiveSizes();
 
-          return (
-            <Pie
-              data={pieData}
-              dataKey="value"
-              innerRadius={innerRadius}
-              outerRadius={outerRadius}
-              paddingAngle={5}
-              cornerRadius={5}
-              stroke="none"
-              labelLine={false}
-              label={({
-                cx,
-                cy,
-                midAngle,
-                outerRadius: pieOuterRadius,
-                value,
-                fill,
-              }) => {
-                const RADIAN = Math.PI / 180;
-                const radius = typeof pieOuterRadius === 'string' 
-                  ? Math.min(cx, cy) * 0.65 // Fallback calculation
-                  : pieOuterRadius;
-                
-                const x = cx + (radius + labelOffset) * Math.cos(-midAngle * RADIAN);
-                const y = cy + (radius + labelOffset) * Math.sin(-midAngle * RADIAN);
+                        return (
+                          <Pie
+                            data={pieData}
+                            dataKey="value"
+                            innerRadius={innerRadius}
+                            outerRadius={outerRadius}
+                            paddingAngle={5}
+                            cornerRadius={5}
+                            stroke="none"
+                            labelLine={false}
+                            label={({
+                              cx,
+                              cy,
+                              midAngle,
+                              outerRadius: pieOuterRadius,
+                              value,
+                              fill,
+                            }) => {
+                              const RADIAN = Math.PI / 180;
+                              const radius = typeof pieOuterRadius === 'string'
+                                ? Math.min(cx, cy) * 0.65 // Fallback calculation
+                                : pieOuterRadius;
 
-                return (
-                  <text
-                    x={x}
-                    y={y}
-                    fill={fill}
-                    fontSize={fontSize}
-                    fontWeight="600"
-                    textAnchor={x > cx ? 'start' : 'end'}
-                    dominantBaseline="central"
-                    className="drop-shadow-sm"
-                  >
-                    {value}
-                  </text>
-                );
-              }}
-            >
-              {pieData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.fill} />
-              ))}
-            </Pie>
-          );
-        })()}
-      </PieChart>
-    </ResponsiveContainer>
-  </div>
-  <div className="flex justify-center gap-4 mt-4 flex-wrap">
-    <div className="flex items-center gap-2">
-      <div className="w-3 h-3 rounded-full bg-green-400"></div>
-      <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Easy</span>
-    </div>
-    <div className="flex items-center gap-2">
-      <div className="w-3 h-3 rounded-full bg-orange-400"></div>
-      <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Medium</span>
-    </div>
-    <div className="flex items-center gap-2">
-      <div className="w-3 h-3 rounded-full bg-red-500"></div>
-      <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Hard</span>
-    </div>
-  </div>
-</div>
+                              const x = cx + (radius + labelOffset) * Math.cos(-midAngle * RADIAN);
+                              const y = cy + (radius + labelOffset) * Math.sin(-midAngle * RADIAN);
+
+                              return (
+                                <text
+                                  x={x}
+                                  y={y}
+                                  fill={fill}
+                                  fontSize={fontSize}
+                                  fontWeight="600"
+                                  textAnchor={x > cx ? 'start' : 'end'}
+                                  dominantBaseline="central"
+                                  className="drop-shadow-sm"
+                                >
+                                  {value}
+                                </text>
+                              );
+                            }}
+                          >
+                            {pieData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.fill} />
+                            ))}
+                          </Pie>
+                        );
+                      })()}
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex justify-center gap-4 mt-4 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                    <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Easy</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-orange-400"></div>
+                    <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Medium</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                    <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Hard</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <h2 className="flex items-center gap-2">
@@ -392,15 +401,15 @@ function TrackerDashboard() {
                 {
                   data?.github.url !== '' && (
                     <a
-                    href={data?.github.url}
-                    className="text-xl md:text-2xl w-fit font-medium border border-gray-700 rounded-lg p-2 md:p-3 hover:bg-gray-800 transition-colors"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <span>
-                      <SiGithub />
-                    </span>
-                  </a>
+                      href={data?.github.url}
+                      className="text-xl md:text-2xl w-fit font-medium border border-gray-700 rounded-lg p-2 md:p-3 hover:bg-gray-800 transition-colors"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <span>
+                        <SiGithub />
+                      </span>
+                    </a>
                   )
                 }
               </div>
@@ -449,50 +458,50 @@ function TrackerDashboard() {
                   {showAll
                     ? data.projects
                     : data.projects.slice(0, 3)?.map((project, index) => (
-                        <div
-                          key={index}
-                          className="rounded-lg border border-[#0ec1e7]/60 flex flex-col gap-2 transition-transform duration-300 hover:scale-105"
-                        >
-                          <div className="w-full h-44 md:h-52 border-b-gray-600 border-b-2 rounded-t-lg overflow-hidden flex items-center justify-center">
-                            <img
-                              src={project.coverImage}
-                              alt={project.projectName}
-                              className="object-cover w-full h-full"
-                            />
-                          </div>
-                          <div className="p-4 pt-0">
-                            <p className="text-white text-start flex items-center gap-1 text-xl font-semibold mb-2">
-                              <Star color="gold" fill="gold" />
-                              {project.projectName}
-                            </p>
-                            {project.websiteUrl !== "" && (
-                              <a
-                                href={project.websiteUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-gray-400 flex gap-2 text-sm md:text-base mb-2"
-                              >
-                                <img
-                                  src={link}
-                                  alt=""
-                                  className="w-5 h-5 text-[#0ec1e7]/60"
-                                />
-                                <p>View Project</p>
-                              </a>
-                            )}
-                            <a
-                              href={project.githubUrl}
-                              target="blank"
-                              className="border-[#0ec1e7]/60 border gap-2 flex text-gray-300 mb-1 p-1 px-2 rounded-full items-center xl:w-fit"
-                            >
-                              <img src={git} alt="git" className="w-5 h-5" />
-                              <p className="overflow-hidden">
-                                {project.githubUrl.split("com/")[1]}
-                              </p>
-                            </a>{" "}
-                          </div>
+                      <div
+                        key={index}
+                        className="rounded-lg border border-[#0ec1e7]/60 flex flex-col gap-2 transition-transform duration-300 hover:scale-105"
+                      >
+                        <div className="w-full h-44 md:h-52 border-b-gray-600 border-b-2 rounded-t-lg overflow-hidden flex items-center justify-center">
+                          <img
+                            src={project.coverImage}
+                            alt={project.projectName}
+                            className="object-cover w-full h-full"
+                          />
                         </div>
-                      ))}
+                        <div className="p-4 pt-0">
+                          <p className="text-white text-start flex items-center gap-1 text-xl font-semibold mb-2">
+                            <Star color="gold" fill="gold" />
+                            {project.projectName}
+                          </p>
+                          {project.websiteUrl !== "" && (
+                            <a
+                              href={project.websiteUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-gray-400 flex gap-2 text-sm md:text-base mb-2"
+                            >
+                              <img
+                                src={link}
+                                alt=""
+                                className="w-5 h-5 text-[#0ec1e7]/60"
+                              />
+                              <p>View Project</p>
+                            </a>
+                          )}
+                          <a
+                            href={project.githubUrl}
+                            target="blank"
+                            className="border-[#0ec1e7]/60 border gap-2 flex text-gray-300 mb-1 p-1 px-2 rounded-full items-center xl:w-fit"
+                          >
+                            <img src={git} alt="git" className="w-5 h-5" />
+                            <p className="overflow-hidden">
+                              {project.githubUrl.split("com/")[1]}
+                            </p>
+                          </a>{" "}
+                        </div>
+                      </div>
+                    ))}
                 </div>
               )}
               {data?.projects.length > 3 && (

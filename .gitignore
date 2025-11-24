@@ -41,3 +41,4 @@ logs
 
 # Optional: ignore .turbo or .nx if you later use them
 .turbo/
+temp

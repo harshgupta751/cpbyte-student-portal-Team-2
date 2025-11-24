@@ -35,16 +35,16 @@ export const login = asyncHandler(async (req, res) => {
 
   res.cookie("token", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: true,
+    sameSite: "None",
     path: "/api/v1/auth",
     maxAge: 60 * 60 * 1000, // 1 hour
   });
 
   res.cookie("refreshToken", rawRefresh, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: true,
+    sameSite: 'None',
     path: "/api/v1/auth",
     maxAge: REFRESH_TOKEN_DAYS * 24 * 60 * 60 * 1000,
   });
@@ -124,12 +124,12 @@ export const refresh = asyncHandler(async (req, res) => {
 
     res.cookie('refreshToken', result.newRaw, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'None',
       path: "/api/v1/auth",
       maxAge: REFRESH_TOKEN_DAYS * 24 * 60 * 60 * 1000,
     });
-console.log("Sent new refresh token cookie:", result.newRaw);
+    // console.log("Sent new refresh token cookie:", result.newRaw);
 
     return res.json({ accessToken: result.newAccess });
   } catch (err) {
@@ -215,8 +215,8 @@ export const logout = asyncHandler(async (req, res) => {
 
   res.clearCookie("refreshToken", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: true,
+    sameSite: "None",
     path: "/api/v1/auth",
   });
 

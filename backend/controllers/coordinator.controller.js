@@ -39,75 +39,91 @@ export const allAttendance = asyncHandler(async (req, res) => {
 export const markAttendance = asyncHandler(async (req, res) => {
   const { responses, subject, date } = req.body;
 
-  if (responses.length === 0) {
+  if (!responses || responses.length === 0) {
     throw new ResponseError("No responses provided", 400);
   }
-  await Promise.all(
-    responses.map(async (response) => {
-      const { library_id, status } = response;
 
-      const user = await prisma.user.findUnique({
-        where: { library_id },
-        include: {
-          attendances: true,
-        }
-      },
-      );
+  const istDate = dayjs(date).tz("Asia/Kolkata").startOf("day").toDate();
 
-      var Tdsa = 0, Tdev = 0, TdsaP = 0, TdevP = 0;
-      user.attendances.forEach((item) => {
-        if (item.subject == "DSA") {
-          Tdsa++;
-          if (item.status == "PRESENT") {
-            TdsaP++;
-          }
-        } else if (item.subject == "DEV") {
-          Tdev++;
-          if (item.status == "PRESENT") {
-            TdevP++;
-          }
-        }
-      })
-      if (subject == "DSA") {
-        if (status == "PRESENT") {
-          TdsaP++;
-        }
+  const libraryIds = responses.map(r => r.library_id);
+  const users = await prisma.user.findMany({
+    where: { library_id: { in: libraryIds } },
+    include: { attendances: true },
+  });
+
+  const userMap = new Map(users.map(u => [u.library_id, u]));
+
+  const ops = [];
+
+  for (const response of responses) {
+    const { library_id, status } = response;
+    const user = userMap.get(library_id);
+
+    if (!user) {
+      throw new ResponseError(`User with Library_ID: ${library_id} not found`, 404);
+    }
+
+    let Tdsa = 0, Tdev = 0, TdsaP = 0, TdevP = 0;
+
+    user.attendances.forEach(item => {
+      if (item.subject === "DSA") {
         Tdsa++;
-      }
-      else {
-        if (status == "PRESENT") {
-          TdevP++;
-        }
+        if (item.status === "PRESENT") TdsaP++;
+      } else if (item.subject === "DEV") {
         Tdev++;
+        if (item.status === "PRESENT") TdevP++;
       }
+    });
 
-      const dsaPercentage = Tdsa ? (TdsaP / Tdsa) * 100 : 0;
-      const devPercentage = Tdev ? (TdevP / Tdev) * 100 : 0;
+    if (subject === "DSA") {
+      Tdsa++;
+      if (status === "PRESENT") TdsaP++;
+    } else {
+      Tdev++;
+      if (status === "PRESENT") TdevP++;
+    }
 
-      if (!user) throw new ResponseError(`User with Library_ID:${library_id} does not exist, 404`);
+    const dsaPercentage = Tdsa ? (TdsaP / Tdsa) * 100 : 0;
+    const devPercentage = Tdev ? (TdevP / Tdev) * 100 : 0;
 
-      const istDate = dayjs(date, "YYYY-MM-DD")
-        .tz("Asia/Kolkata")
-        .startOf("day")
-        .toDate();
+    const finalStatus =
+      status === "PRESENT"
+        ? "PRESENT"
+        : status === "ABSENT WITH REASON"
+        ? "ABSENT_WITH_REASON"
+        : "ABSENT_WITHOUT_REASON";
 
-      await prisma.attendance.create({
-        data: {
-          user: { connect: { id: user.id } },
-          status: status === "PRESENT" ? "PRESENT" : status === "ABSENT WITH REASON" ? "ABSENT_WITH_REASON" : "ABSENT_WITHOUT_REASON",
-          subject: subject,
-          date: istDate,
+    ops.push(
+      prisma.attendance.upsert({
+        where: {
+          userId_date_subject: {
+            userId: user.id,
+            date: istDate,
+            subject,
+          },
         },
-      });
-      await prisma.user.update({
-        where: { library_id },
-        data: {
-          dsaAttendance: dsaPercentage,
-          devAttendance: devPercentage
-        }
+        update: { status: finalStatus },
+        create: {
+          userId: user.id,
+          subject,
+          date: istDate,
+          status: finalStatus,
+        },
       })
-    })
-  );
+    );
+
+    ops.push(
+      prisma.user.update({
+        where: { id: user.id },
+        data: {
+          dsaAttendance: Math.round(dsaPercentage),
+          devAttendance: Math.round(devPercentage),
+        },
+      })
+    );
+  }
+
+  await prisma.$transaction(ops, { timeout: 20000 });
 
   res.json({
     success: true,
