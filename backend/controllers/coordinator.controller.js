@@ -139,7 +139,6 @@ export const memberOfDomain = asyncHandler(async (req, res) => {
   }
 
   const validDevDomains = {
-    ANDROID: "ANDROID_FLUTTER",
     ANDROID_FLUTTER: "ANDROID_FLUTTER",
     ANDROID_KOTLIN: "ANDROID_KOTLIN",
     ARVR: "ARVR",
