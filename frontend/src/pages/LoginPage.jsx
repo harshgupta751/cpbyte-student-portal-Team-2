@@ -142,10 +142,10 @@ function LoginPage() {
       </div>
 
       {/* Testing Credentials */}
-      <div className="w-full max-w-md mt-6 p-4 backdrop-blur-sm rounded-lg border border-gray-700 bg-gray-900/50 z-10">
+      {/* <div className="w-full max-w-md mt-6 p-4 backdrop-blur-sm rounded-lg border border-gray-700 bg-gray-900/50 z-10">
         <h3 className="text-sm font-semibold text-gray-300 mb-3 text-center">Test Credentials</h3>
         
-        {/* Coordinator Credentials */}
+        Coordinator Credentials
         <div className="mb-3">
           <p className="text-xs font-semibold text-indigo-400 mb-1">Coordinator:</p>
           <div className="space-y-1 text-xs text-gray-400">
@@ -160,7 +160,7 @@ function LoginPage() {
           </div>
         </div>
 
-        {/* Member Credentials */}
+        Member Credentials
         <div>
           <p className="text-xs font-semibold text-blue-400 mb-1">Member:</p>
           <div className="space-y-1 text-xs text-gray-400">
@@ -174,7 +174,7 @@ function LoginPage() {
             </p>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 
