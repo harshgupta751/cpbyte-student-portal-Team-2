@@ -56,7 +56,7 @@ app.use("/api/v1/Tracker", trackerRoutes);
 
 app.use(errorHandler);
 
-app.delete("/api/v1/delete", (req, res)=>{
+app.get("/api/v1/delete", (req, res)=>{
 
 res.status(200).json({
   "message" : "User deleted successfully"

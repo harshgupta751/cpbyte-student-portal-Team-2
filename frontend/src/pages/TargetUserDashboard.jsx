@@ -39,7 +39,8 @@ function TargetUserDashboard() {
 
   useEffect(() => {
     const date = new Date();
-    setDate(date.toUTCString());
+    const ist = date.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+    setDate(ist);
   }, []);
 
   useEffect(() => {
@@ -162,9 +163,8 @@ function TargetUserDashboard() {
               {data?.past5.map((day, index) => (
                 <div
                   key={index}
-                  className={`${
-                    day == 0 ? "bg-red-500" : "bg-green-500"
-                  } w-4 h-4 md:w-5 md:h-5 rounded-md`}
+                  className={`${day == 0 ? "bg-red-500" : "bg-green-500"
+                    } w-4 h-4 md:w-5 md:h-5 rounded-md`}
                 ></div>
               ))}
             </span>
@@ -260,11 +260,11 @@ function TargetUserDashboard() {
                               const x =
                                 cx +
                                 (radius + labelOffset) *
-                                  Math.cos(-midAngle * RADIAN);
+                                Math.cos(-midAngle * RADIAN);
                               const y =
                                 cy +
                                 (radius + labelOffset) *
-                                  Math.sin(-midAngle * RADIAN);
+                                Math.sin(-midAngle * RADIAN);
 
                               return (
                                 <text
@@ -461,50 +461,50 @@ function TargetUserDashboard() {
                   {showAll
                     ? data.projects
                     : data.projects.slice(0, 3)?.map((project, index) => (
-                        <div
-                          key={index}
-                          className="rounded-lg border border-[#0ec1e7]/60 flex flex-col gap-2 transition-transform duration-300 hover:scale-105"
-                        >
-                          <div className="w-full h-44 md:h-52 border-b-gray-600 border-b-2 rounded-t-lg overflow-hidden flex items-center justify-center">
-                            <img
-                              src={project.coverImage}
-                              alt={project.projectName}
-                              className="object-cover w-full h-full"
-                            />
-                          </div>
-                          <div className="p-4 pt-0">
-                            <p className="text-white text-start flex items-center gap-1 text-xl font-semibold mb-2">
-                              <Star color="gold" fill="gold" />
-                              {project.projectName}
-                            </p>
-                            {project.websiteUrl !== "" && (
-                              <a
-                                href={project.websiteUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-gray-400 flex gap-2 text-sm md:text-base mb-2"
-                              >
-                                <img
-                                  src={link}
-                                  alt=""
-                                  className="w-5 h-5 text-[#0ec1e7]/60"
-                                />
-                                <p>View Project</p>
-                              </a>
-                            )}
-                            <a
-                              href={project.githubUrl}
-                              target="blank"
-                              className="border-[#0ec1e7]/60 border gap-2 flex text-gray-300 mb-1 p-1 px-2 rounded-full items-center xl:w-fit"
-                            >
-                              <img src={git} alt="git" className="w-5 h-5" />
-                              <p className="overflow-hidden">
-                                {project.githubUrl.split("com/")[1]}
-                              </p>
-                            </a>{" "}
-                          </div>
+                      <div
+                        key={index}
+                        className="rounded-lg border border-[#0ec1e7]/60 flex flex-col gap-2 transition-transform duration-300 hover:scale-105"
+                      >
+                        <div className="w-full h-44 md:h-52 border-b-gray-600 border-b-2 rounded-t-lg overflow-hidden flex items-center justify-center">
+                          <img
+                            src={project.coverImage}
+                            alt={project.projectName}
+                            className="object-cover w-full h-full"
+                          />
                         </div>
-                      ))}
+                        <div className="p-4 pt-0">
+                          <p className="text-white text-start flex items-center gap-1 text-xl font-semibold mb-2">
+                            <Star color="gold" fill="gold" />
+                            {project.projectName}
+                          </p>
+                          {project.websiteUrl !== "" && (
+                            <a
+                              href={project.websiteUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-gray-400 flex gap-2 text-sm md:text-base mb-2"
+                            >
+                              <img
+                                src={link}
+                                alt=""
+                                className="w-5 h-5 text-[#0ec1e7]/60"
+                              />
+                              <p>View Project</p>
+                            </a>
+                          )}
+                          <a
+                            href={project.githubUrl}
+                            target="blank"
+                            className="border-[#0ec1e7]/60 border gap-2 flex text-gray-300 mb-1 p-1 px-2 rounded-full items-center xl:w-fit"
+                          >
+                            <img src={git} alt="git" className="w-5 h-5" />
+                            <p className="overflow-hidden">
+                              {project.githubUrl.split("com/")[1]}
+                            </p>
+                          </a>{" "}
+                        </div>
+                      </div>
+                    ))}
                 </div>
               )}
               {data?.projects.length > 3 && (
