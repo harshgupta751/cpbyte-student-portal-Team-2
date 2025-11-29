@@ -1,5 +1,5 @@
 import express from 'express';
-import { addGitHub, addLeetCode, addProject, addSkill, getAll, getTrackerDashboard, refreshAll, removeProject, removeSkill } from '../controllers/Tracker.controller.js';
+import { addGitHub, addLeetCode, addProject, addSkill, getAll, getTrackerDashboard, refreshAll, removeProject, removeSkill,getTop } from '../controllers/Tracker.controller.js';
 import isAuthenticated from '../middlewares/auth/isAuthenticated.js';
 
 const router = express.Router();
@@ -13,5 +13,6 @@ router.post('/addLeetCode',isAuthenticated, addLeetCode);
 router.post('/addGithub', isAuthenticated, addGitHub)
 router.post('/refreshAll', isAuthenticated, refreshAll)
 router.get("/getAll", isAuthenticated, getAll)
+router.get("/getTop", isAuthenticated, getTop)
 
 export default router;

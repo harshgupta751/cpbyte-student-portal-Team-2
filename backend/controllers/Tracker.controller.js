@@ -381,48 +381,96 @@ export const refreshAll = asyncHandler(async (req, res) => {
   });
 });
 
-export const getAll = asyncHandler(async (req, res) => {
-  const collection = await prisma.leetcode.findMany({
+export const getTop = asyncHandler(async (req, res) => {
+  const limit = Math.max(1, parseInt(req.query.limit || "3", 10));
+  const language = req.query.language;
+  const year = req.query.year ? parseInt(req.query.year, 10) : undefined;
+
+  const whereFilter = {};
+  if (language || year !== undefined) {
+    whereFilter.tracker = { user: {} };
+    if (language) whereFilter.tracker.user.domain_dsa = language;
+    if (year !== undefined) whereFilter.tracker.user.year = year;
+  }
+
+  const entries = await prisma.leetcode.findMany({
+    where: whereFilter,
+    orderBy: { solvedProblems: "desc" },
+    take: limit,
     include: {
       tracker: {
         include: {
           user: {
-            select: { name: true,
-              library_id:true,
-              avatar:true,
-              domain_dsa:true,
-              year:true
-             }
+            select: { name: true, library_id: true, avatar: true, domain_dsa: true, year: true }
           }
         }
       }
     }
   });
-  const formatted = collection
+
+  const formatted = entries
     .filter(entry => entry.tracker?.id)
     .map((entry) => ({
       id: entry.tracker.id,
       name: entry.tracker.user.name,
       library_id: entry.tracker.user.library_id,
       solvedProblems: entry.solvedProblems,
-      avatar:entry.tracker.user.avatar,
-      language:entry.tracker.user.domain_dsa,
-      previous:entry.tracker.past5,
-      year:entry.tracker.user.year,
-      leetcodeUsername:entry.username
-    }))
-    .sort((a, b) => b.solvedProblems - a.solvedProblems)
-    .map((entry, index) => ({
-      ...entry,
-      rank: index + 1,
+      avatar: entry.tracker.user.avatar,
+      language: entry.tracker.user.domain_dsa,
+      previous: entry.tracker.past5,
+      year: entry.tracker.user.year,
+      leetcodeUsername: entry.username
     }));
-  await Promise.all(
-    formatted.map((entry) =>
-      prisma.trackerDashboard.update({
-        where: { id: entry.id },
-        data: { rank: entry.rank },
-      })
-    )
-  );
-  res.status(200).json(formatted.sort((a, b) => a.rank - b.rank));
+
+  return res.status(200).json(formatted);
+});
+
+export const getAll = asyncHandler(async (req, res) => {
+  const page = Math.max(0, parseInt(req.query.page || "0", 10));
+  const limit = Math.max(1, parseInt(req.query.limit || "10", 10));
+  const language = req.query.language;
+  const year = req.query.year ? parseInt(req.query.year, 10) : undefined;
+
+  const whereFilter = {};
+  if (language || year !== undefined) {
+    whereFilter.tracker = { user: {} };
+    if (language) whereFilter.tracker.user.domain_dsa = language;
+    if (year !== undefined) whereFilter.tracker.user.year = year;
+  }
+
+  const total = await prisma.leetcode.count({ where: whereFilter });
+
+  const pageEntries = await prisma.leetcode.findMany({
+    where: whereFilter,
+    orderBy: { solvedProblems: "desc" },
+    skip: page * limit,
+    take: limit,
+    include: {
+      tracker: {
+        include: {
+          user: {
+            select: { name: true, library_id: true, avatar: true, domain_dsa: true, year: true }
+          }
+        }
+      }
+    }
+  });
+
+  const formattedPage = pageEntries
+    .filter(entry => entry.tracker?.id)
+    .map((entry) => ({
+      id: entry.tracker.id,
+      name: entry.tracker.user.name,
+      library_id: entry.tracker.user.library_id,
+      solvedProblems: entry.solvedProblems,
+      avatar: entry.tracker.user.avatar,
+      language: entry.tracker.user.domain_dsa,
+      previous: entry.tracker.past5,
+      year: entry.tracker.user.year,
+      leetcodeUsername: entry.username
+    }));
+
+  const withRank = formattedPage.map((entry, idx) => ({ ...entry, rank: page * limit + idx + 1 }));
+
+  return res.status(200).json({ users: withRank, total });
 });
