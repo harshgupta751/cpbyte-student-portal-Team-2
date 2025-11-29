@@ -3,7 +3,7 @@ import trophy from "../assets/trophy.png";
 import noimage from "../assets/noImage.webp";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchPage, fetchTop } from "../redux/slices/leaderboard";
+import { fetchPage, fetchTop } from "../redux/slices/Leaderboard";
 import LeaderboardSkeleton from "../componenets/LeaderboardSkeleton";
 import * as THREE from 'three';
 import "./LeaderBoard.css";
